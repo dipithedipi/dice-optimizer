@@ -1,0 +1,1 @@
+sort -t'|' -k1,1n data.txt > sorted.txt
