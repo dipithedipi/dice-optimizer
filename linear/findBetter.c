@@ -1,5 +1,3 @@
-// FIND THE BEST DICE BETWEEN ALL
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -14,6 +12,8 @@
 typedef struct {
     int combination[NUM_ELEMENTS];
 } Combination;
+
+Combination diceToBeat = {{6,6,6,6,6,0}};
 
 typedef struct {
     float winPercentage;
@@ -40,7 +40,7 @@ void findCombinations(int arr[], int index, int reducedNum, Combination *results
     if (index >= NUM_ELEMENTS)
         return;
 
-    int start = (index == 0) ? MIN : arr[index - 1];
+    int start = (index == 0)? MIN : arr[index - 1];
 
     for (int k = start; k <= MAX; k++) {
         arr[index] = k;
@@ -52,8 +52,8 @@ void evaluateDice(Combination *a, Combination *b, float *winPercentage, float *l
     int win = 0, lose = 0, tie = 0;
 
     for (int i = 0; i < COMPARISON; i++) {
-        int rollA = a->combination[randInt(0, NUM_ELEMENTS - 1)];
-        int rollB = b->combination[randInt(0, NUM_ELEMENTS - 1)];
+        int rollA = a->combination[randInt(0, NUM_ELEMENTS - 1)]; // Genera un valore casuale per il dado A
+        int rollB = diceToBeat.combination[0]; // Usa il valore fisso del dado da battere
 
         if (rollA > rollB) {
             win++;
@@ -73,7 +73,7 @@ int main() {
     srand(time(NULL));
 
     FILE *outputFile;
-    outputFile = fopen("elaborated_probability.txt", "w");
+    outputFile = fopen("better_to_beat.txt", "w");
     if (outputFile == NULL) {
         printf("Errore nell'apertura del file.");
         return 1;
@@ -82,29 +82,27 @@ int main() {
     // Allocazione dinamica per memorizzare le combinazioni trovate
     int maxCombinations = 5000;
     Combination *resultsA = (Combination *)malloc(maxCombinations * sizeof(Combination));
-    Combination *resultsB = (Combination *)malloc(maxCombinations * sizeof(Combination));
     Result *results = (Result *)malloc(maxCombinations * sizeof(Result));
-    int countA = 0, countB = 0, countResults = 0;
+    int countA = 0, countResults = 0;
     float maxWinPercentage = 0.0f;
     Combination bestDice;
 
     int arr[NUM_ELEMENTS];
     findCombinations(arr, 0, TARGET_SUM, resultsA, &countA);
-    findCombinations(arr, 0, TARGET_SUM, resultsB, &countB);
 
     // Troviamo e salviamo le informazioni su tutte le combinazioni
     for (int i = 0; i < countA; i++) {
         float totalWinPercentage = 0.0f, totalLosePercentage = 0.0f, totalTiePercentage = 0.0f;
-        for (int j = 0; j < countB; j++) {
+        for (int j = 0; j < COMPARISON; j++) { // Modificato per usare COMPARISON invece di countB
             float winPercentage, losePercentage, tiePercentage;
-            evaluateDice(&resultsA[i], &resultsB[j], &winPercentage, &losePercentage, &tiePercentage);
+            evaluateDice(&resultsA[i], &diceToBeat, &winPercentage, &losePercentage, &tiePercentage);
             totalWinPercentage += winPercentage;
             totalLosePercentage += losePercentage;
             totalTiePercentage += tiePercentage;
         }
-        totalWinPercentage /= countB;
-        totalLosePercentage /= countB;
-        totalTiePercentage /= countB;
+        totalWinPercentage /= COMPARISON; // Calcolo corretto della media
+        totalLosePercentage /= COMPARISON; // Calcolo corretto della media
+        totalTiePercentage /= COMPARISON; // Calcolo corretto della media
 
         if (totalWinPercentage > maxWinPercentage) {
             maxWinPercentage = totalWinPercentage;
@@ -113,7 +111,7 @@ int main() {
 
         fprintf(outputFile, "Dice A: [");
         for (int k = 0; k < NUM_ELEMENTS; k++)
-            fprintf(outputFile, "%d%s", resultsA[i].combination[k], (k == NUM_ELEMENTS - 1) ? "]\n" : ",");
+            fprintf(outputFile, "%d%s", resultsA[i].combination[k], (k == NUM_ELEMENTS - 1)? "]\n" : ",");
         fprintf(outputFile, "Total win percentage: %.2f%%\n", totalWinPercentage);
         fprintf(outputFile, "Total lose percentage: %.2f%%\n", totalLosePercentage);
         fprintf(outputFile, "Total tie percentage: %.2f%%\n\n", totalTiePercentage);
@@ -122,11 +120,10 @@ int main() {
     fprintf(outputFile, "Best dice:\n");
     fprintf(outputFile, "Dice A: [");
     for (int k = 0; k < NUM_ELEMENTS; k++)
-        fprintf(outputFile, "%d%s", bestDice.combination[k], (k == NUM_ELEMENTS - 1) ? "]\n" : ",");
+        fprintf(outputFile, "%d%s", bestDice.combination[k], (k == NUM_ELEMENTS - 1)? "]\n" : ",");
 
     // Liberiamo la memoria allocata
     free(resultsA);
-    free(resultsB);
     free(results);
 
     // Chiudiamo il file

@@ -1,3 +1,5 @@
+// SAVE ALL DICE NUMBER COMPARISON BETWEEN ALL DICES
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>

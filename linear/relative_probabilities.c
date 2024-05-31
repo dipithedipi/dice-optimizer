@@ -1,3 +1,5 @@
+// PROBABILITY BETWEEN 2 DICES FOR ALL DICES
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
