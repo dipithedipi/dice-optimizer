@@ -13,7 +13,7 @@ typedef struct {
     int combination[NUM_ELEMENTS];
 } Combination;
 
-Combination diceToBeat = {{6,6,6,6,6,0}};
+Combination diceToBeat = {{5,5,5,5,5,5}};
 
 typedef struct {
     float winPercentage;
